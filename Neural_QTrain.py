@@ -17,6 +17,8 @@ INITIAL_EPSILON =  0.9# starting value of epsilon
 FINAL_EPSILON =  20# final value of epsilon
 EPSILON_DECAY_STEPS =  0.5# decay period
 
+HIDDEN_NODES = 100
+
 # Create environment
 # -- DO NOT MODIFY --
 env = gym.make(ENV_NAME)
@@ -26,20 +28,56 @@ ACTION_DIM = env.action_space.n
 
 # Placeholders
 # -- DO NOT MODIFY --
+# state_in: takes the current state of the environment, which is 
+#       represented in our case as a sequence of reals.
+# action_in: accepts a one-hot action input. It should be used to "mask"
+#       the q-values output tensor and return a q-value for that action.
+# target_in: is the Q-value we want to move the network towards producing.
+#       Note that this target value is not fixed - this is one of the
+#       components that seperates RL from other forms of machine learning.
 state_in = tf.placeholder("float", [None, STATE_DIM])
 action_in = tf.placeholder("float", [None, ACTION_DIM])
 target_in = tf.placeholder("float", [None])
 
 # TODO: Define Network Graph
 
+# first layer
+w1 = tf.get_variable('w1', shape=[STATE_DIM, HIDDEN_NODES])
+b1 = tf.get_variable('b1', shape=[1, HIDDEN_NODES],\
+        initializer=tf.constant_initializer(0.0))
+
+# second layer
+w2 = tf.get_variable('w2', shape=[HIDDEN_NODES, HIDDEN_NODES])
+b2 = tf.get_variable('b2', shape=[1, HIDDEN_NODES],\
+        initializer=tf.constant_initializer(0.0))
+
+# third layer
+w2 = tf.get_variable('w3', shape=[HIDDEN_NODES, HIDDEN_NODES])
+b2 = tf.get_variable('b3', shape=[1, HIDDEN_NODES],\
+        initializer=tf.constant_initializer(0.0))
+
+# calculation
+output_1 = tf.tanh(tf.matmul(state_in, w1) + b1)
+output_2 = tf.tanh(tf.matmul(output_1, w2) + b2)
+output_3 = tf.tanh(tf.matmul(output_2, w3) + b3)
 
 # TODO: Network outputs
-q_values = 0.1
-q_action = 1
+# q_values: Tensor containing Q-values for all available actions i.e.
+#       if the action space is 8 this will be a rank-1 tensor of length 8
+# q_action: This should be a rank-1 tensor containing 1 element.
+#       This value should be the q-value for the action set in the
+#       action_in placeholder
+# Loss/Optimizer Definition You can define any loss function you feel is
+#       appropriate. Hint: should be a function of target_in and
+#       q_action. You should also make careful choice of the optimizer
+#       to use. 
+q_values = output_3
+q_action = tf.reduce_sum(tf.multiply(q_values, action_in),\
+        reduction_indices=1)
 
 # TODO: Loss/Optimizer Definition
-loss = 
-optimizer =
+loss = tf.reduce_sum(tf.square(target_in - q_action))
+optimizer = tf.train.AdamOptimizer().minimize(loss)
 
 # Start session - Tensorflow housekeeping
 session = tf.InteractiveSession()
