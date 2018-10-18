@@ -29,11 +29,14 @@ HIDDEN_LAYER_DIM = 100
 
 # Placeholders
 # -- DO NOT MODIFY --
-# state_in: takes the current state of the environment, which is 
+# state_in: shape=(?, 4)
+#       takes the current state of the environment, which is 
 #       represented in our case as a sequence of reals.
-# action_in: accepts a one-hot action input. It should be used to "mask"
+# action_in: shape=(?, 2)
+#       accepts a one-hot action input. It should be used to "mask"
 #       the q-values output tensor and return a q-value for that action.
-# target_in: is the Q-value we want to move the network towards producing.
+# target_in: shape=(?,)
+#       is the Q-value we want to move the network towards producing.
 #       Note that this target value is not fixed - this is one of the
 #       components that seperates RL from other forms of machine learning.
 state_in = tf.placeholder("float", [None, STATE_DIM])
@@ -46,21 +49,19 @@ target_in = tf.placeholder("float", [None])
 w1 = tf.get_variable('w1', shape=[STATE_DIM, HIDDEN_LAYER_DIM],)
 b1 = tf.get_variable('b1', shape=[1, HIDDEN_LAYER_DIM],\
         initializer=tf.constant_initializer(0.0))
+output_1 = tf.tanh(tf.matmul(state_in, w1) + b1)    # shape=(?, 100)
 
 # hidden layer
 w2 = tf.get_variable('w2', shape=[HIDDEN_LAYER_DIM, HIDDEN_LAYER_DIM],)
 b2 = tf.get_variable('b2', shape=[1, HIDDEN_LAYER_DIM],\
         initializer=tf.constant_initializer(0.0))
+output_2 = tf.tanh(tf.matmul(output_1, w2) + b2) # (?, 100)
 
 # output layer
 w3 = tf.get_variable('w3', shape=[HIDDEN_LAYER_DIM, ACTION_DIM],)
 b3 = tf.get_variable('b3', shape=[1, ACTION_DIM],\
         initializer=tf.constant_initializer(0.0))
-
-# calculation
-output_1 = tf.tanh(tf.matmul(state_in, w1) + b1)
-output_2 = tf.tanh(tf.matmul(output_1, w2) + b2)
-output_3 = tf.matmul(output_2, w3) + b3
+output_3 = tf.matmul(output_2, w3) + b3 # (?, 2)
 
 # TODO: Network outputs
 # q_values: Tensor containing Q-values for all available actions i.e.
