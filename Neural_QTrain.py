@@ -78,7 +78,7 @@ for episode in range(EPISODE):
     for step in range(STEP):
         action = explore(state, epsilon)
         next_state, reward, done, _ = env.step(np.argmax(action))
-
+##
         nextstate_q_values = q_values.eval(feed_dict={
             state_in: [next_state]
         })
@@ -94,7 +94,7 @@ for episode in range(EPISODE):
             action_in: [action],
             state_in: [state]
         })
-
+##
         # Update
         state = next_state
         if done:
