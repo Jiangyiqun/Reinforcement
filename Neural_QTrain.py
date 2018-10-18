@@ -17,14 +17,15 @@ INITIAL_EPSILON =  0.9# starting value of epsilon
 FINAL_EPSILON =  20# final value of epsilon
 EPSILON_DECAY_STEPS =  0.5# decay period
 
-HIDDEN_NODES = 100
-
 # Create environment
 # -- DO NOT MODIFY --
 env = gym.make(ENV_NAME)
 epsilon = INITIAL_EPSILON
 STATE_DIM = env.observation_space.shape[0]
 ACTION_DIM = env.action_space.n
+# For Neural Network
+HIDDEN_LAYER_DIM = 100
+
 
 # Placeholders
 # -- DO NOT MODIFY --
@@ -41,25 +42,25 @@ target_in = tf.placeholder("float", [None])
 
 # TODO: Define Network Graph
 
-# first layer
-w1 = tf.get_variable('w1', shape=[STATE_DIM, HIDDEN_NODES])
-b1 = tf.get_variable('b1', shape=[1, HIDDEN_NODES],\
+# input layer
+w1 = tf.get_variable('w1', shape=[STATE_DIM, HIDDEN_LAYER_DIM],)
+b1 = tf.get_variable('b1', shape=[1, HIDDEN_LAYER_DIM],\
         initializer=tf.constant_initializer(0.0))
 
-# second layer
-w2 = tf.get_variable('w2', shape=[HIDDEN_NODES, HIDDEN_NODES])
-b2 = tf.get_variable('b2', shape=[1, HIDDEN_NODES],\
+# hidden layer
+w2 = tf.get_variable('w2', shape=[HIDDEN_LAYER_DIM, HIDDEN_LAYER_DIM],)
+b2 = tf.get_variable('b2', shape=[1, HIDDEN_LAYER_DIM],\
         initializer=tf.constant_initializer(0.0))
 
-# third layer
-w2 = tf.get_variable('w3', shape=[HIDDEN_NODES, HIDDEN_NODES])
-b2 = tf.get_variable('b3', shape=[1, HIDDEN_NODES],\
+# output layer
+w3 = tf.get_variable('w3', shape=[HIDDEN_LAYER_DIM, ACTION_DIM],)
+b3 = tf.get_variable('b3', shape=[1, ACTION_DIM],\
         initializer=tf.constant_initializer(0.0))
 
 # calculation
 output_1 = tf.tanh(tf.matmul(state_in, w1) + b1)
 output_2 = tf.tanh(tf.matmul(output_1, w2) + b2)
-output_3 = tf.tanh(tf.matmul(output_2, w3) + b3)
+output_3 = tf.matmul(output_2, w3) + b3
 
 # TODO: Network outputs
 # q_values: Tensor containing Q-values for all available actions i.e.
@@ -79,9 +80,10 @@ q_action = tf.reduce_sum(tf.multiply(q_values, action_in),\
 loss = tf.reduce_sum(tf.square(target_in - q_action))
 optimizer = tf.train.AdamOptimizer().minimize(loss)
 
-# Start session - Tensorflow housekeeping
-session = tf.InteractiveSession()
-session.run(tf.global_variables_initializer())
+
+
+########################################################################
+
 
 
 # -- DO NOT MODIFY ---
