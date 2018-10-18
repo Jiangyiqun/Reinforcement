@@ -38,8 +38,8 @@ q_values =
 q_action =
 
 # TODO: Loss/Optimizer Definition
-loss =
-optimizer =
+loss = tf.reduce_mean(tf.squared_difference(self.q_target, self.q_eval_wrt_a, name='TD_error'))
+optimizer = tf.train.RMSPropOptimizer(self.lr).minimize(self.loss)
 
 # Start session - Tensorflow housekeeping
 session = tf.InteractiveSession()
