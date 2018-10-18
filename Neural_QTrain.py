@@ -12,10 +12,10 @@ TEST = 10  # The number of tests to run every TEST_FREQUENCY episodes
 TEST_FREQUENCY = 100  # Num episodes to run before visualizing test accuracy
 
 # TODO: HyperParameters
-GAMMA =  # discount factor
-INITIAL_EPSILON =  # starting value of epsilon
-FINAL_EPSILON =  # final value of epsilon
-EPSILON_DECAY_STEPS =  # decay period
+GAMMA = 0.9 # discount factor
+INITIAL_EPSILON =  0.9# starting value of epsilon
+FINAL_EPSILON =  20# final value of epsilon
+EPSILON_DECAY_STEPS =  0.5# decay period
 
 # Create environment
 # -- DO NOT MODIFY --
@@ -34,11 +34,11 @@ target_in = tf.placeholder("float", [None])
 
 
 # TODO: Network outputs
-q_values =
-q_action =
+q_values = 0.1
+q_action = 1
 
 # TODO: Loss/Optimizer Definition
-loss =
+loss = 
 optimizer =
 
 # Start session - Tensorflow housekeeping
