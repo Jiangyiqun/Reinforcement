@@ -2,15 +2,13 @@ import gym
 import tensorflow as tf
 import numpy as np
 import random
-
+import time
 
 ############################## debug flag ##############################
 TIMEKEEP = True
 
 if (TIMEKEEP):
-    from time import time
-    start = time()
-
+    start = previous_time = time.time()
 
 # General Parameters
 # -- DO NOT MODIFY --
@@ -18,13 +16,13 @@ ENV_NAME = 'CartPole-v0'
 EPISODE = 200000  # Episode limitation
 STEP = 200  # Step limitation in an episode
 TEST = 10  # The number of tests to run every TEST_FREQUENCY episodes
-TEST_FREQUENCY = 50  # Num episodes to run before visualizing test accuracy
+TEST_FREQUENCY = 100  # Num episodes to run before visualizing test accuracy
 
 # TODO: HyperParameters
-GAMMA = 0.9 # discount factor
-INITIAL_EPSILON =  0.9 # starting value of epsilon
-FINAL_EPSILON =  0.1 # final value of epsilon
-EPSILON_DECAY_STEPS =  100 # decay period
+GAMMA = 0.99 # discount factor
+INITIAL_EPSILON =  1 # starting value of epsilon
+FINAL_EPSILON =  0.001 # final value of epsilon
+EPSILON_DECAY_STEPS =  10 # decay period
 
 # Create environment
 # -- DO NOT MODIFY --
@@ -123,7 +121,10 @@ for episode in range(EPISODE):
     state = env.reset()
     
     # Update epsilon once per episode
-    epsilon -= epsilon / EPSILON_DECAY_STEPS
+    if epsilon > FINAL_EPSILON:
+        epsilon -= epsilon / EPSILON_DECAY_STEPS
+        if epsilon < FINAL_EPSILON:
+            epsilon = FINAL_EPSILON
 
     # Move through env according to e-greedy policy
     for step in range(STEP):
@@ -182,7 +183,7 @@ for episode in range(EPISODE):
         for i in range(TEST):
             state = env.reset()
             for j in range(STEP):
-                env.render()
+#                env.render()
                 action = np.argmax(q_values.eval(feed_dict={
                     state_in: state.reshape(1, STATE_DIM)
                 }))
@@ -196,7 +197,10 @@ for episode in range(EPISODE):
 
 
         if (TIMEKEEP):
-            print("time is:", time() - start)
+            current_time = time.time()
+            print("time is:", current_time - start,"    ",current_time - previous_time)
+            previous_time = current_time
+            
 
 session.close()
 env.close()
