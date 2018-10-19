@@ -25,6 +25,7 @@ STATE_DIM = env.observation_space.shape[0]
 ACTION_DIM = env.action_space.n
 # For Neural Network
 HIDDEN_LAYER_DIM = 100
+REPLAY_SIZE = 10000
 
 
 # Placeholders
@@ -80,7 +81,8 @@ q_action = tf.reduce_sum(tf.multiply(q_values, action_in),\
 # TODO: Loss/Optimizer Definition
 loss = tf.reduce_sum(tf.square(target_in - q_action))
 optimizer = tf.train.AdamOptimizer().minimize(loss)
-
+session = tf.InteractiveSession()
+session.run(tf.global_variables_initializer())
 
 
 ########################################################################
@@ -94,7 +96,9 @@ def explore(state, epsilon):
     and assuming the network has already been defined, decide which action to
     take using e-greedy exploration based on the current q-value estimates.
     """
-    print(state)
+    state = state.reshape(1, 4)
+    # print(state)
+    # print(state.shape)
     Q_estimates = q_values.eval(feed_dict={
         state_in: state
     })
@@ -104,24 +108,28 @@ def explore(state, epsilon):
         action = np.argmax(Q_estimates)
     one_hot_action = np.zeros(ACTION_DIM)
     one_hot_action[action] = 1
-    return one_hot_action
+    # print("one_hot_action:", one_hot_action)
+    # print("action:", action)
+    return action, one_hot_action
 
 
 # Main learning loop
+print("\n###################### Start Learning ######################")
+replay_buffer = []
 for episode in range(EPISODE):
 
     # initialize task
     state = env.reset()
-
     # Update epsilon once per episode
     epsilon -= epsilon / EPSILON_DECAY_STEPS
 
     # Move through env according to e-greedy policy
     for step in range(STEP):
         
-        action = explore(state, epsilon)
-        next_state, reward, done, _ = env.step(np.argmax(action))
+        action, one_hot_action = explore(state, epsilon)
+        next_state, reward, done, _ = env.step(action)
 
+        next_state = next_state.reshape(1, 4)
         nextstate_q_values = q_values.eval(feed_dict={
             state_in: next_state
         })
@@ -130,9 +138,8 @@ for episode in range(EPISODE):
         # hint1: Bellman
         # hint2: consider if the episode has terminated
         
-        
-        one_hot_action = np.zeros(action_dim)
-        one_hot_action[action] = 1
+        # one_hot_action = np.zeros(ACTION_DIM)
+        # one_hot_action[action] = 1
 
         # append to buffer
         replay_buffer.append([state, one_hot_action, reward, next_state, done])
@@ -182,6 +189,8 @@ for episode in range(EPISODE):
         if done:
             break
 
+
+    print("\n###################### Start Testing ######################")
     # Test and view sample runs - can disable render to save time
     # -- DO NOT MODIFY --
     if (episode % TEST_FREQUENCY == 0 and episode != 0):
@@ -201,4 +210,5 @@ for episode in range(EPISODE):
         print('episode:', episode, 'epsilon:', epsilon, 'Evaluation '
                                                         'Average Reward:', ave_reward)
 
+session.close()
 env.close()
