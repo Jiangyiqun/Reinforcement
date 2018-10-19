@@ -94,8 +94,9 @@ def explore(state, epsilon):
     and assuming the network has already been defined, decide which action to
     take using e-greedy exploration based on the current q-value estimates.
     """
+    print(state)
     Q_estimates = q_values.eval(feed_dict={
-        state_in: [state]
+        state_in: state
     })
     if random.random() <= epsilon:
         action = random.randint(0, ACTION_DIM - 1)
@@ -117,23 +118,63 @@ for episode in range(EPISODE):
 
     # Move through env according to e-greedy policy
     for step in range(STEP):
+        
         action = explore(state, epsilon)
         next_state, reward, done, _ = env.step(np.argmax(action))
 
         nextstate_q_values = q_values.eval(feed_dict={
-            state_in: [next_state]
+            state_in: next_state
         })
 
         # TODO: Calculate the target q-value.
         # hint1: Bellman
         # hint2: consider if the episode has terminated
-        target =
+        
+        
+        one_hot_action = np.zeros(action_dim)
+        one_hot_action[action] = 1
+
+        # append to buffer
+        replay_buffer.append([state, one_hot_action, reward, next_state, done])
+
+        # Ensure replay_buffer doesn't grow larger than REPLAY_SIZE
+        if len(replay_buffer) > REPLAY_SIZE:
+                replay_buffer.pop(0)
+
+        state = next_state
+
+        # perform a training step if the replay_buffer has a batch worth of samples
+        if (len(replay_buffer) > 64):
+                        
+                minibatch = random.sample(replay_buffer, 64)
+
+                state_batch = [data[0] for data in minibatch]
+                action_batch = [data[1] for data in minibatch]
+                reward_batch = [data[2] for data in minibatch]
+                next_state_batch = [data[3] for data in minibatch]
+
+                target_batch = []
+                Q_value_batch = q_values.eval(feed_dict={
+                        state_in: next_state_batch
+                })
+                for i in range(0, 64):
+                        sample_is_done = minibatch[i][4]
+                        if sample_is_done:
+                                target_batch.append(reward_batch[i])
+                        else:
+                                # TO IMPLEMENT: set the target_val to the correct Q value update
+                                target_val = reward_batch[i] + GAMMA * np.max(Q_value_batch[i])
+                                target_batch.append(target_val)	
+
 
         # Do one training step
+#        with Session() as sess:
+        
+        
         session.run([optimizer], feed_dict={
-            target_in: [target],
-            action_in: [action],
-            state_in: [state]
+            target_in: target_batch,
+            action_in: action_batch,
+            state_in: state_batch
         })
 
         # Update
@@ -150,7 +191,7 @@ for episode in range(EPISODE):
             for j in range(STEP):
                 env.render()
                 action = np.argmax(q_values.eval(feed_dict={
-                    state_in: [state]
+                    state_in: state
                 }))
                 state, reward, done, _ = env.step(action)
                 total_reward += reward
