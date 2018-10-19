@@ -6,10 +6,10 @@ import random
 # General Parameters
 # -- DO NOT MODIFY --
 ENV_NAME = 'CartPole-v0'
-EPISODE = 100  # Episode limitation
+EPISODE = 200000  # Episode limitation
 STEP = 200  # Step limitation in an episode
 TEST = 10  # The number of tests to run every TEST_FREQUENCY episodes
-TEST_FREQUENCY = 100  # Num episodes to run before visualizing test accuracy
+TEST_FREQUENCY = 10  # Num episodes to run before visualizing test accuracy
 
 # TODO: HyperParameters
 GAMMA = 0.9 # discount factor
@@ -116,7 +116,6 @@ def explore(state, epsilon):
 print("\n###################### Start Learning ######################")
 replay_buffer = []
 for episode in range(EPISODE):
-    print("Episode:", episode)
     # initialize task
     state = env.reset()
     # Update epsilon once per episode
@@ -195,25 +194,25 @@ for episode in range(EPISODE):
             break
 
 
-print("\n###################### Start Testing ######################")
-# Test and view sample runs - can disable render to save time
-# -- DO NOT MODIFY --
-if (episode % TEST_FREQUENCY == 0 and episode != 0):
-    total_reward = 0
-    for i in range(TEST):
-        state = env.reset()
-        for j in range(STEP):
-            env.render()
-            action = np.argmax(q_values.eval(feed_dict={
-                state_in: state
-            }))
-            state, reward, done, _ = env.step(action)
-            total_reward += reward
-            if done:
-                break
-    ave_reward = total_reward / TEST
-    print('episode:', episode, 'epsilon:', epsilon, 'Evaluation '
-                                                    'Average Reward:', ave_reward)
+    
+    # Test and view sample runs - can disable render to save time
+    # -- DO NOT MODIFY --
+    if (episode % TEST_FREQUENCY == 0 and episode != 0):
+        total_reward = 0
+        for i in range(TEST):
+            state = env.reset()
+            for j in range(STEP):
+                env.render()
+                action = np.argmax(q_values.eval(feed_dict={
+                    state_in: state.reshape(1, STATE_DIM)
+                }))
+                state, reward, done, _ = env.step(action)
+                total_reward += reward
+                if done:
+                    break
+        ave_reward = total_reward / TEST
+        print('episode:', episode, 'epsilon:', epsilon, 'Evaluation '
+                                                        'Average Reward:', ave_reward)
 
 session.close()
 env.close()
