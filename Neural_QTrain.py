@@ -6,7 +6,7 @@ import random
 # General Parameters
 # -- DO NOT MODIFY --
 ENV_NAME = 'CartPole-v0'
-EPISODE = 200000  # Episode limitation
+EPISODE = 2000  # Episode limitation
 STEP = 200  # Step limitation in an episode
 TEST = 10  # The number of tests to run every TEST_FREQUENCY episodes
 TEST_FREQUENCY = 100  # Num episodes to run before visualizing test accuracy
@@ -96,11 +96,10 @@ def explore(state, epsilon):
     and assuming the network has already been defined, decide which action to
     take using e-greedy exploration based on the current q-value estimates.
     """
-    state = state.reshape(1, STATE_DIM)
     # print(state)
     # print(state.shape)
     Q_estimates = q_values.eval(feed_dict={
-        state_in: state
+        state_in: state.reshape(1, STATE_DIM)
     })
     if random.random() <= epsilon:
         action = random.randint(0, ACTION_DIM - 1)
@@ -117,7 +116,7 @@ def explore(state, epsilon):
 print("\n###################### Start Learning ######################")
 replay_buffer = []
 for episode in range(EPISODE):
-
+    print("Episode:", episode)
     # initialize task
     state = env.reset()
     # Update epsilon once per episode
@@ -128,10 +127,10 @@ for episode in range(EPISODE):
         
         action, one_hot_action = explore(state, epsilon)
         next_state, reward, done, _ = env.step(action)
+        env.render()
 
-        next_state = next_state.reshape(1, STATE_DIM)
         nextstate_q_values = q_values.eval(feed_dict={
-            state_in: next_state
+            state_in: next_state.reshape(1, STATE_DIM)
         })
 
         # TODO: Calculate the target q-value.
@@ -148,7 +147,7 @@ for episode in range(EPISODE):
         if len(replay_buffer) > REPLAY_SIZE:
                 replay_buffer.pop(0)
 
-        state = next_state
+        # state = next_state
 
         # perform a training step if the replay_buffer has a batch worth of samples
         if (len(replay_buffer) > BATCH_SIZE):
@@ -160,10 +159,10 @@ for episode in range(EPISODE):
                 reward_batch = [data[2] for data in minibatch]
                 next_state_batch = [data[3] for data in minibatch]
 
-                state_batch = np.asarray(state_batch)
-                next_state_batch = np.asarray(next_state_batch).reshape(\
-                        BATCH_SIZE, STATE_DIM)
-                # print("state_batch:", state_batch.shape())
+                # state_batch = np.asarray(state_batch)
+                # next_state_batch = np.asarray(next_state_batch).reshape(\
+                #         BATCH_SIZE, STATE_DIM)
+                # print("state_batch:", state_batch[0].reshape(4))
                 # print("next_state_batch:", next_state_batch.shape)
 
                 target_batch = []
