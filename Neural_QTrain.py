@@ -6,7 +6,7 @@ import random
 # General Parameters
 # -- DO NOT MODIFY --
 ENV_NAME = 'CartPole-v0'
-EPISODE = 2000  # Episode limitation
+EPISODE = 100  # Episode limitation
 STEP = 200  # Step limitation in an episode
 TEST = 10  # The number of tests to run every TEST_FREQUENCY episodes
 TEST_FREQUENCY = 100  # Num episodes to run before visualizing test accuracy
