@@ -3,6 +3,15 @@ import tensorflow as tf
 import numpy as np
 import random
 
+
+############################## debug flag ##############################
+TIMEKEEP = True
+
+if (TIMEKEEP):
+    from time import time
+    start = time()
+
+
 # General Parameters
 # -- DO NOT MODIFY --
 ENV_NAME = 'CartPole-v0'
@@ -184,6 +193,10 @@ for episode in range(EPISODE):
         ave_reward = total_reward / TEST
         print('episode:', episode, 'epsilon:', epsilon, 'Evaluation '
                                                         'Average Reward:', ave_reward)
+
+
+        if (TIMEKEEP):
+            print("time is:", time() - start)
 
 session.close()
 env.close()
