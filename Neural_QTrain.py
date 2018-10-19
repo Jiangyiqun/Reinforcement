@@ -3,13 +3,20 @@ import tensorflow as tf
 import numpy as np
 import random
 
+############################## debug flag ##############################
+TIMEKEEP = True
+
+if (TIMEKEEP):
+    from time import time
+    start = time()
+
 # General Parameters
 # -- DO NOT MODIFY --
 ENV_NAME = 'CartPole-v0'
 EPISODE = 200000  # Episode limitation
 STEP = 200  # Step limitation in an episode
 TEST = 10  # The number of tests to run every TEST_FREQUENCY episodes
-TEST_FREQUENCY = 10  # Num episodes to run before visualizing test accuracy
+TEST_FREQUENCY = 100  # Num episodes to run before visualizing test accuracy
 
 # TODO: HyperParameters
 GAMMA = 0.9 # discount factor
@@ -213,6 +220,8 @@ for episode in range(EPISODE):
         ave_reward = total_reward / TEST
         print('episode:', episode, 'epsilon:', epsilon, 'Evaluation '
                                                         'Average Reward:', ave_reward)
+        if (TIMEKEEP):
+            print("time is:", time() - start)
 
 session.close()
 env.close()
