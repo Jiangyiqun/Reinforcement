@@ -21,12 +21,12 @@ EPSILON_DECAY_STEPS =  0.5# decay period
 # -- DO NOT MODIFY --
 env = gym.make(ENV_NAME)
 epsilon = INITIAL_EPSILON
-STATE_DIM = env.observation_space.shape[0]
-ACTION_DIM = env.action_space.n
+STATE_DIM = env.observation_space.shape[0]  # 4
+ACTION_DIM = env.action_space.n # 2
 # For Neural Network
 HIDDEN_LAYER_DIM = 100
 REPLAY_SIZE = 10000
-
+BATCH_SIZE = 64
 
 # Placeholders
 # -- DO NOT MODIFY --
@@ -96,7 +96,7 @@ def explore(state, epsilon):
     and assuming the network has already been defined, decide which action to
     take using e-greedy exploration based on the current q-value estimates.
     """
-    state = state.reshape(1, 4)
+    state = state.reshape(1, STATE_DIM)
     # print(state)
     # print(state.shape)
     Q_estimates = q_values.eval(feed_dict={
@@ -129,7 +129,7 @@ for episode in range(EPISODE):
         action, one_hot_action = explore(state, epsilon)
         next_state, reward, done, _ = env.step(action)
 
-        next_state = next_state.reshape(1, 4)
+        next_state = next_state.reshape(1, STATE_DIM)
         nextstate_q_values = q_values.eval(feed_dict={
             state_in: next_state
         })
@@ -151,14 +151,20 @@ for episode in range(EPISODE):
         state = next_state
 
         # perform a training step if the replay_buffer has a batch worth of samples
-        if (len(replay_buffer) > 64):
+        if (len(replay_buffer) > BATCH_SIZE):
                         
-                minibatch = random.sample(replay_buffer, 64)
+                minibatch = random.sample(replay_buffer, BATCH_SIZE)
 
                 state_batch = [data[0] for data in minibatch]
                 action_batch = [data[1] for data in minibatch]
                 reward_batch = [data[2] for data in minibatch]
                 next_state_batch = [data[3] for data in minibatch]
+
+                state_batch = np.asarray(state_batch)
+                next_state_batch = np.asarray(next_state_batch).reshape(\
+                        BATCH_SIZE, STATE_DIM)
+                # print("state_batch:", state_batch.shape())
+                # print("next_state_batch:", next_state_batch.shape)
 
                 target_batch = []
                 Q_value_batch = q_values.eval(feed_dict={
@@ -172,17 +178,17 @@ for episode in range(EPISODE):
                                 # TO IMPLEMENT: set the target_val to the correct Q value update
                                 target_val = reward_batch[i] + GAMMA * np.max(Q_value_batch[i])
                                 target_batch.append(target_val)	
+                # print("target_batch:", target_batch)
 
-
-        # Do one training step
-#        with Session() as sess:
+                # Do one training step
+                # with Session() as sess:
         
         
-        session.run([optimizer], feed_dict={
-            target_in: target_batch,
-            action_in: action_batch,
-            state_in: state_batch
-        })
+                session.run([optimizer], feed_dict={
+                    target_in: target_batch,
+                    action_in: action_batch,
+                    state_in: state_batch
+                })
 
         # Update
         state = next_state
@@ -190,25 +196,25 @@ for episode in range(EPISODE):
             break
 
 
-    print("\n###################### Start Testing ######################")
-    # Test and view sample runs - can disable render to save time
-    # -- DO NOT MODIFY --
-    if (episode % TEST_FREQUENCY == 0 and episode != 0):
-        total_reward = 0
-        for i in range(TEST):
-            state = env.reset()
-            for j in range(STEP):
-                env.render()
-                action = np.argmax(q_values.eval(feed_dict={
-                    state_in: state
-                }))
-                state, reward, done, _ = env.step(action)
-                total_reward += reward
-                if done:
-                    break
-        ave_reward = total_reward / TEST
-        print('episode:', episode, 'epsilon:', epsilon, 'Evaluation '
-                                                        'Average Reward:', ave_reward)
+print("\n###################### Start Testing ######################")
+# Test and view sample runs - can disable render to save time
+# -- DO NOT MODIFY --
+if (episode % TEST_FREQUENCY == 0 and episode != 0):
+    total_reward = 0
+    for i in range(TEST):
+        state = env.reset()
+        for j in range(STEP):
+            env.render()
+            action = np.argmax(q_values.eval(feed_dict={
+                state_in: state
+            }))
+            state, reward, done, _ = env.step(action)
+            total_reward += reward
+            if done:
+                break
+    ave_reward = total_reward / TEST
+    print('episode:', episode, 'epsilon:', epsilon, 'Evaluation '
+                                                    'Average Reward:', ave_reward)
 
 session.close()
 env.close()
