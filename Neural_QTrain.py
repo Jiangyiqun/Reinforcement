@@ -6,7 +6,6 @@ import time
 
 ############################## debug flag ##############################
 TIMEKEEP = True
-
 if (TIMEKEEP):
     start = previous_time = time.time()
 
@@ -21,7 +20,7 @@ TEST_FREQUENCY = 100  # Num episodes to run before visualizing test accuracy
 # TODO: HyperParameters
 GAMMA = 0.99 # discount factor
 INITIAL_EPSILON =  1 # starting value of epsilon
-FINAL_EPSILON =  0.001 # final value of epsilon
+FINAL_EPSILON =  0.0001 # final value of epsilon
 EPSILON_DECAY_STEPS =  10 # decay period
 
 # Create environment
@@ -143,22 +142,27 @@ for episode in range(EPISODE):
         replay_buffer.append([one_hot_action, state, reward, next_state, done])
 
         # perform a training step if the replay_buffer has a batch worth of samples
-        if (len(replay_buffer) > BATCH_SIZE):
-                        
-            minibatch = random.sample(replay_buffer, BATCH_SIZE)
-            
-            action_batch = [data[0] for data in minibatch]
-            state_batch = [data[1] for data in minibatch]
-            reward_batch = [data[2] for data in minibatch]
-            next_state_batch = [data[3] for data in minibatch]
+        if (len(replay_buffer) > BATCH_SIZE):                        
+            action_batch = []
+            state_batch = []
+            reward_batch = []
+            next_state_batch = []
+            is_done_batch = []
+            batch_index = []
+            batch_index = np.random.choice(len(replay_buffer), BATCH_SIZE//2)
+            for i in batch_index:
+                action_batch.append(replay_buffer[i][0])
+                state_batch.append(replay_buffer[i][1])
+                reward_batch.append(replay_buffer[i][2])
+                next_state_batch.append(replay_buffer[i][3])
+                is_done_batch.append(replay_buffer[i][4]) 
 
             Q_value_batch = q_values.eval(feed_dict={
                 state_in: next_state_batch
             })
             target_batch = []
-            for i in range(0, BATCH_SIZE):
-                sample_is_done = minibatch[i][4]
-                if sample_is_done:
+            for i in range(0, BATCH_SIZE//2):
+                if is_done_batch[i]:
                     target_batch.append(reward_batch[i])
                 else:
                     target = reward_batch[i] + GAMMA * np.max(Q_value_batch[i])
