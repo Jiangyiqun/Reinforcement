@@ -5,9 +5,21 @@ import random
 import time
 
 ############################## debug flag ##############################
-TIMEKEEP = True
+TIMEKEEP = False
+TIMEOUT = False
+
+
 if (TIMEKEEP):
     start = previous_time = time.time()
+
+
+if (TIMEOUT):
+    import threading, os
+    def timeout():
+        print('two minutes has past, time out!')
+        os._exit(0)
+
+    threading.Timer(120, timeout).start()
 
 # General Parameters
 # -- DO NOT MODIFY --
@@ -31,7 +43,7 @@ STATE_DIM = env.observation_space.shape[0]  # 4
 ACTION_DIM = env.action_space.n # 2
 # For Neural Network
 HIDDEN_LAYER_DIM = 100
-BATCH_SIZE = 64
+BATCH_SIZE = 16
 
 # Placeholders
 # -- DO NOT MODIFY --
@@ -187,7 +199,7 @@ for episode in range(EPISODE):
         for i in range(TEST):
             state = env.reset()
             for j in range(STEP):
-#                env.render()
+                env.render()
                 action = np.argmax(q_values.eval(feed_dict={
                     state_in: state.reshape(1, STATE_DIM)
                 }))
@@ -202,7 +214,8 @@ for episode in range(EPISODE):
 
         if (TIMEKEEP):
             current_time = time.time()
-            print("time is:", current_time - start,"    ",current_time - previous_time)
+            print("total time is:", current_time - start,\
+                    "step time is",current_time - previous_time)
             previous_time = current_time
             
 
