@@ -124,7 +124,7 @@ def explore(state, epsilon):
 
 
 # Main learning loop
-print("\n###################### Start Learning ######################")
+#print("\n###################### Start Learning ######################")
 replay_buffer = []
 for episode in range(EPISODE):
     
