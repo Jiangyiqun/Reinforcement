@@ -42,8 +42,8 @@ epsilon = INITIAL_EPSILON
 STATE_DIM = env.observation_space.shape[0]  # 4
 ACTION_DIM = env.action_space.n # 2
 # For Neural Network
-HIDDEN_LAYER_DIM = 100
-BATCH_SIZE = 16
+HIDDEN_LAYER_DIM = 200
+BATCH_SIZE = 32
 
 # Placeholders
 # -- DO NOT MODIFY --

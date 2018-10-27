@@ -52,14 +52,15 @@ hidden layer    | Reward
 ----------------|--------------------------------
 10              | around 10           
 50              | 15 -> 30 -> 104 -> 113
-100             | 111 -> 200            
+100             | 111 -> 200    
+200             | 200        
 1000            | 128.3            
 
 ## Finally we choose HyperParameters
 
 Parameter       | Number
 ----------------|-------------
-batch size      | 16
+batch size      | 32
 episilon decay  | 10
 gamma           | 0.99    
-hidden layers   | 100
+hidden layers   | 200
